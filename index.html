@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Asistente</title>
+    <style>
+        :root {
+            --bg: #eef1f5;
+            --card: #fff;
+            --ink: #14213d;
+            --mute: #5b6577;
+            --line: #d8deea;
+            --accent: #2b50ff;
+            color-scheme: light dark;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f1420;
+                --card: #18202f;
+                --ink: #e8ecf5;
+                --mute: #9aa6bd;
+                --line: #2a3447;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: clamp(15px, .8rem + .45vw, 20px);
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        @supports (height:100dvh) {
+            html, body {
+                height: 100dvh;
+            }
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font: 1rem/1.5 "Avenir Next","Segoe UI",system-ui,sans-serif;
+            display: flex;
+            justify-content: center;
+        }
+
+        main {
+            width: 100%;
+            max-width: 46rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: clamp(10px, 2.5vw, 24px);
+            gap: .75rem;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: .9rem;
+            padding-bottom: .75rem;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .avatar {
+            flex: none;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            overflow: hidden;
+        }
+
+            .avatar img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .avatar.sm {
+                width: 1.75rem;
+                height: 1.75rem;
+                font-size: .7rem;
+            }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            letter-spacing: -.01em;
+        }
+
+        header p {
+            margin: 0;
+            color: var(--mute);
+            font-size: .9rem;
+        }
+
+        .links {
+            margin-left: auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+        }
+
+            .links a {
+                font-size: .85rem;
+                padding: .3rem .7rem;
+                border-radius: 999px;
+                border: 1px solid var(--line);
+                color: var(--ink);
+                text-decoration: none;
+            }
+
+                .links a:hover {
+                    background: var(--accent);
+                    border-color: var(--accent);
+                    color: #fff;
+                }
+
+        #log {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 4px 2px;
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            max-width: 88%;
+        }
+
+            .row.user {
+                align-self: flex-end;
+            }
+
+        .msg {
+            padding: .65rem .9rem;
+            border-radius: 1rem;
+            white-space: pre-wrap;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-bottom-left-radius: 4px;
+        }
+
+        .row.user .msg {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            border-radius: 16px;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg.error {
+            border-color: #d64545;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+        }
+
+            .chips button {
+                font: inherit;
+                font-size: .88rem;
+                padding: .4rem .8rem;
+                border-radius: 999px;
+                border: 1px solid var(--line);
+                background: var(--card);
+                color: var(--ink);
+                cursor: pointer;
+            }
+
+                .chips button:hover, .chips button:focus-visible, .chips button:active {
+                    background: var(--accent);
+                    border-color: var(--accent);
+                    color: #fff;
+                }
+
+        form {
+            display: flex;
+            gap: 8px;
+        }
+
+        input {
+            flex: 1;
+            font: inherit;
+            padding: .7rem .9rem;
+            border-radius: .65rem;
+            border: 1px solid var(--line);
+            background: var(--card);
+            color: var(--ink);
+        }
+
+        form button {
+            font: inherit;
+            font-weight: 600;
+            padding: 0 1.1rem;
+            border-radius: .65rem;
+            border: 0;
+            background: var(--accent);
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:disabled, input:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        small {
+            color: var(--mute);
+            text-align: center;
+        }
+
+            small a {
+                color: var(--accent);
+                text-decoration: none;
+            }
+
+                small a:hover {
+                    text-decoration: underline;
+                }
+
+        @media (max-width:520px) {
+            header {
+                flex-wrap: wrap;
+            }
+
+            .links {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <header>
+            <div class="avatar" id="avatar"></div>
+            <div><h1 id="name"></h1><p id="headline"></p></div>
+            <nav class="links" id="links" aria-label="Enlaces"></nav>
+        </header>
+        <div id="log" aria-live="polite"></div>
+        <div class="chips" id="chips"></div>
+        <form id="form">
+            <input id="input" maxlength="500" placeholder="Escribe tu pregunta" autocomplete="off" aria-label="Tu pregunta">
+            <button id="send">Enviar</button>
+        </form>
+        <small id="left"></small>
+    </main>
+    <script>
+// ===== PERSONALIZA AQUÍ =====
+const CONFIG = {
+                  name: "Iker Cruzado",
+                  headline: "Desarrollador de Aplicaciones Multiplataforma (DAM)",
+                  email: "iker.cruzado.jimenez.dev@gmail.com",
+                  cvUrl: "cv.pdf",                  // guarda cv.pdf en la misma carpeta que index.html; vacío = ocultar
+                  avatar: "",                       // ruta o URL de tu foto (ej. "foto.jpg"); vacío = iniciales
+                  accent: "#2b50ff",                // color principal
+                  links: [
+                    { label: "GitHub", url: "https://github.com/ikercruzadojimenez" }
+                  ],
+                  greeting: "Hola, soy el asistente de IA de Iker Cruzado. Pregúntame por su experiencia, proyectos, formación o stack.",
+                  suggestions: [
+                    "¿Qué proyectos destacan?",
+                    "¿Qué tecnologías domina?",
+                    "¿Cuál es su experiencia y estudios?",
+                    "¿Dónde puedo ver su GitHub?",
+                    "¿Cómo puedo contactarle?"
+                  ],
+                  workerUrl: "https://cv-asistente.ikercruzadojim.workers.dev",
+                  dailyLimit: 10,                   // límite personal visible; el real lo aplica el Worker
+                  globalLimit: 120                  // tope global diario visible (debe coincidir con LIMITS.globalPerDay del Worker)
+};
+// ============================
+
+const $ = id => document.getElementById(id);
+const log = $("log"), input = $("input"), send = $("send"), left = $("left");
+const initials = CONFIG.name.split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+let history = [];
+let globalRemaining = null;
+let currentGlobalLimit = CONFIG.globalLimit;
+
+document.title = "Asistente de " + CONFIG.name;
+document.documentElement.style.setProperty("--accent", CONFIG.accent);
+$("name").textContent = CONFIG.name;
+$("headline").textContent = CONFIG.headline;
+function fillAvatar(el) {
+                  if (CONFIG.avatar) { const i = document.createElement("img"); i.src = CONFIG.avatar; i.alt = ""; el.appendChild(i); }
+                  else el.textContent = initials;
+}
+fillAvatar($("avatar"));
+CONFIG.links.forEach(l => {
+                  if (!/^https?:\/\//i.test(l.url)) return;
+                  const a = document.createElement("a");
+                  a.href = l.url;
+                  a.target = "_blank";
+                  a.rel = "noopener noreferrer";
+                  a.textContent = l.label;
+                  $("links").appendChild(a);
+});
+if (CONFIG.cvUrl) {
+                  const cvLink = document.createElement("a");
+                  cvLink.href = CONFIG.cvUrl;
+                  cvLink.textContent = "CV";
+                  cvLink.target = "_blank";
+                  cvLink.rel = "noopener noreferrer";
+                  cvLink.setAttribute("download", "Iker_Cruzado_CV.pdf");
+                  $("links").appendChild(cvLink);
+}
+
+function used() {
+                  try { const d = JSON.parse(localStorage.getItem("chatUse") || "{}"); return d.day === new Date().toDateString() ? d.n : 0; }
+                  catch { return 0; }
+}
+function bump() {
+                  try { localStorage.setItem("chatUse", JSON.stringify({ day: new Date().toDateString(), n: used() + 1 })); } catch {}
+}
+function appendMail(container) {
+                  const mail = document.createElement("a");
+                  mail.href = `mailto:${CONFIG.email}`;
+                  mail.textContent = CONFIG.email;
+                  container.appendChild(mail);
+}
+function refreshLeft() {
+                  const r = Math.max(0, CONFIG.dailyLimit - used());
+                  const globalExhausted = globalRemaining === 0;
+                  left.replaceChildren();
+
+                  if (globalExhausted) {
+                    left.append("Cupo global diario agotado (0/");
+                    left.append(`${currentGlobalLimit}). Vuelve mañana o escribe a `);
+                    appendMail(left);
+                    left.append(".");
+                    input.disabled = send.disabled = true;
+                    return;
+                  }
+
+                  if (r) {
+                    left.append(`Te quedan ${r} mensajes hoy`);
+                    if (typeof globalRemaining === "number") {
+                      left.append(` · Cupo global hoy: ${globalRemaining}/${currentGlobalLimit}`);
+                    } else {
+                      left.append(` · Límite global: ${currentGlobalLimit}/día`);
+                    }
+                    left.append(" · Contacto: ");
+                    appendMail(left);
+                  } else {
+                    left.append("Has llegado al límite de hoy. Vuelve mañana o escríbeme a ");
+                    appendMail(left);
+                    left.append(".");
+                  }
+                  input.disabled = send.disabled = r === 0 || globalExhausted;
+}
+function add(text, who) {
+                  const row = document.createElement("div"); row.className = "row " + who;
+                  if (who === "bot") { const av = document.createElement("div"); av.className = "avatar sm"; fillAvatar(av); row.appendChild(av); }
+                  const m = document.createElement("div"); m.className = "msg"; m.textContent = text;
+                  row.appendChild(m); log.appendChild(row); log.scrollTop = log.scrollHeight; return m;
+}
+async function ask(text) {
+                  const clean = text.trim();
+                  if (!clean) {
+                    input.placeholder = "Escribe una pregunta antes de enviar";
+                    input.focus();
+                    return;
+                  }
+                  if (used() >= CONFIG.dailyLimit || globalRemaining === 0) return;
+                  input.placeholder = "Escribe tu pregunta";
+                  $("chips").replaceChildren();
+                  add(clean, "user"); history.push({ role: "user", content: clean });
+                  input.value = ""; send.disabled = input.disabled = true;
+                  const wait = add("Escribiendo…", "bot");
+                  try {
+                    const r = await fetch(CONFIG.workerUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history }) });
+                    const data = await r.json();
+                    if (typeof data.globalLimit === "number") currentGlobalLimit = data.globalLimit;
+                    if (typeof data.globalRemaining === "number") globalRemaining = data.globalRemaining;
+                    wait.textContent = data.reply || "No he podido responder. Inténtalo de nuevo.";
+                    if (!r.ok) wait.classList.add("error"); else { history.push({ role: "assistant", content: data.reply }); bump(); }
+                  } catch {
+                    wait.textContent = "No hay conexión con el asistente. Inténtalo de nuevo en un rato."; wait.classList.add("error");
+                  }
+                  refreshLeft(); if (!input.disabled) input.focus();
+}
+CONFIG.suggestions.forEach(s => { const b = document.createElement("button"); b.type = "button"; b.textContent = s; b.onclick = () => ask(s); $("chips").appendChild(b); });
+$("form").addEventListener("submit", e => { e.preventDefault(); ask(input.value); });
+add(CONFIG.greeting, "bot");
+refreshLeft();
+    </script>
+</body>
+</html>
