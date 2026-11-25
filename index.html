@@ -127,8 +127,17 @@
                 cursor: pointer;
             }
 
-                .links a:hover,
-                .links button:hover:not(:disabled) {
+                @media (hover: hover) {
+                    .links a:hover,
+                    .links button:hover:not(:disabled) {
+                        background: var(--accent);
+                        border-color: var(--accent);
+                        color: #fff;
+                    }
+                }
+
+                .links a:active,
+                .links button:active:not(:disabled) {
                     background: var(--accent);
                     border-color: var(--accent);
                     color: #fff;
@@ -258,7 +267,14 @@
                 cursor: pointer;
             }
 
-                .chips button:hover:not(:disabled),
+                @media (hover: hover) {
+                    .chips button:hover:not(:disabled) {
+                        background: var(--accent);
+                        border-color: var(--accent);
+                        color: #fff;
+                    }
+                }
+
                 .chips button:focus-visible:not(:disabled),
                 .chips button:active:not(:disabled) {
                     background: var(--accent);
