@@ -170,6 +170,32 @@
             border-color: #d64545;
         }
 
+        .faq-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: .45rem;
+        }
+
+        .faq-toggle {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            font: inherit;
+            font-size: .88rem;
+            font-weight: 600;
+            padding: .5rem .85rem;
+            border-radius: .65rem;
+            border: 1px solid var(--line);
+            background: var(--card);
+            color: var(--ink);
+            cursor: pointer;
+        }
+
+            .faq-toggle:hover:not(:disabled) {
+                border-color: var(--accent);
+            }
+
         .chips {
             display: flex;
             flex-wrap: wrap;
@@ -192,6 +218,32 @@
                     border-color: var(--accent);
                     color: #fff;
                 }
+
+        @media (max-width: 600px) {
+            .faq-toggle {
+                display: flex;
+            }
+
+            .chips {
+                display: none;
+                flex-direction: column;
+                max-height: 36vh;
+                overflow-y: auto;
+                gap: .4rem;
+            }
+
+            .faq-wrap.open .chips {
+                display: flex;
+            }
+
+            .chips button {
+                width: 100%;
+                text-align: left;
+                border-radius: .65rem;
+                font-size: .85rem;
+                padding: .5rem .8rem;
+            }
+        }
 
         form {
             display: flex;
@@ -263,7 +315,13 @@
             <nav class="links" id="links" aria-label="Enlaces"></nav>
         </header>
         <div id="log" aria-live="polite"></div>
-        <div class="chips" id="chips"></div>
+        <div class="faq-wrap" id="faqWrap">
+            <button type="button" class="faq-toggle" id="faqToggle" aria-expanded="false" aria-controls="chips">
+                <span>Preguntas frecuentes</span>
+                <span id="faqArrow" aria-hidden="true">▾</span>
+            </button>
+            <div class="chips" id="chips"></div>
+        </div>
         <form id="form">
             <input id="input" maxlength="500" placeholder="Escribe tu pregunta" autocomplete="off" aria-label="Tu pregunta">
             <button id="send">Enviar</button>
@@ -299,11 +357,22 @@ const CONFIG = {
 
 const $ = id => document.getElementById(id);
 const log = $("log"), input = $("input"), send = $("send"), left = $("left"), chipsEl = $("chips");
+const faqWrap = $("faqWrap"), faqToggle = $("faqToggle"), faqArrow = $("faqArrow");
 const initials = CONFIG.name.split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
 let history = [];
 let globalRemaining = CONFIG.globalLimit;
 let currentGlobalLimit = CONFIG.globalLimit;
 let busy = false;
+
+function setFaqOpen(open) {
+          faqWrap.classList.toggle("open", open);
+          faqToggle.setAttribute("aria-expanded", String(open));
+          faqArrow.textContent = open ? "▴" : "▾";
+}
+
+faqToggle.addEventListener("click", () => {
+          setFaqOpen(!faqWrap.classList.contains("open"));
+});
 
 document.title = "Asistente de " + CONFIG.name;
 document.documentElement.style.setProperty("--accent", CONFIG.accent);
@@ -350,7 +419,7 @@ function appendMail(container) {
           container.appendChild(mail);
 }
 function setControlsDisabled(disabled) {
-          input.disabled = send.disabled = disabled;
+          input.disabled = send.disabled = faqToggle.disabled = disabled;
           chipsEl.querySelectorAll("button").forEach(b => b.disabled = disabled);
 }
 function refreshLeft() {
@@ -402,6 +471,7 @@ async function ask(text) {
             return;
           }
           if (busy || used() >= CONFIG.dailyLimit || globalRemaining === 0) return;
+          setFaqOpen(false);
           input.placeholder = "Escribe tu pregunta";
           add(clean, "user"); history.push({ role: "user", content: clean });
           input.value = "";
