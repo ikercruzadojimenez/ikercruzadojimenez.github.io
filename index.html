@@ -170,31 +170,39 @@
             border-color: #d64545;
         }
 
-        .faq-wrap {
-            display: flex;
-            flex-direction: column;
-            gap: .45rem;
+        details.faq-box {
+            margin: 0;
         }
 
-        .faq-toggle {
+        summary.faq-toggle {
             display: none;
+            list-style: none;
             align-items: center;
             justify-content: space-between;
             width: 100%;
-            font: inherit;
             font-size: .88rem;
             font-weight: 600;
-            padding: .5rem .85rem;
+            padding: .55rem .85rem;
             border-radius: .65rem;
             border: 1px solid var(--line);
             background: var(--card);
             color: var(--ink);
             cursor: pointer;
+            user-select: none;
         }
 
-            .faq-toggle:hover:not(:disabled) {
-                border-color: var(--accent);
+            summary.faq-toggle::-webkit-details-marker {
+                display: none;
             }
+
+            summary.faq-toggle::after {
+                content: "▾";
+                font-size: .95rem;
+            }
+
+        details.faq-box[open] summary.faq-toggle::after {
+            content: "▴";
+        }
 
         .chips {
             display: flex;
@@ -220,20 +228,16 @@
                 }
 
         @media (max-width: 600px) {
-            .faq-toggle {
+            summary.faq-toggle {
                 display: flex;
             }
 
             .chips {
-                display: none;
                 flex-direction: column;
+                margin-top: .45rem;
                 max-height: 36vh;
                 overflow-y: auto;
                 gap: .4rem;
-            }
-
-            .faq-wrap.open .chips {
-                display: flex;
             }
 
             .chips button {
@@ -315,13 +319,10 @@
             <nav class="links" id="links" aria-label="Enlaces"></nav>
         </header>
         <div id="log" aria-live="polite"></div>
-        <div class="faq-wrap" id="faqWrap">
-            <button type="button" class="faq-toggle" id="faqToggle" aria-expanded="false" aria-controls="chips">
-                <span>Preguntas frecuentes</span>
-                <span id="faqArrow" aria-hidden="true">▾</span>
-            </button>
+        <details class="faq-box" id="faqBox">
+            <summary class="faq-toggle">Preguntas frecuentes</summary>
             <div class="chips" id="chips"></div>
-        </div>
+        </details>
         <form id="form">
             <input id="input" maxlength="500" placeholder="Escribe tu pregunta" autocomplete="off" aria-label="Tu pregunta">
             <button id="send">Enviar</button>
@@ -356,23 +357,19 @@ const CONFIG = {
 // ============================
 
 const $ = id => document.getElementById(id);
-const log = $("log"), input = $("input"), send = $("send"), left = $("left"), chipsEl = $("chips");
-const faqWrap = $("faqWrap"), faqToggle = $("faqToggle"), faqArrow = $("faqArrow");
+const log = $("log"), input = $("input"), send = $("send"), left = $("left"), chipsEl = $("chips"), faqBox = $("faqBox");
 const initials = CONFIG.name.split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
 let history = [];
 let globalRemaining = CONFIG.globalLimit;
 let currentGlobalLimit = CONFIG.globalLimit;
 let busy = false;
 
-function setFaqOpen(open) {
-          faqWrap.classList.toggle("open", open);
-          faqToggle.setAttribute("aria-expanded", String(open));
-          faqArrow.textContent = open ? "▴" : "▾";
+function syncFaqState() {
+          if (window.innerWidth > 600) faqBox.setAttribute("open", "");
+          else faqBox.removeAttribute("open");
 }
-
-faqToggle.addEventListener("click", () => {
-          setFaqOpen(!faqWrap.classList.contains("open"));
-});
+syncFaqState();
+window.addEventListener("resize", syncFaqState);
 
 document.title = "Asistente de " + CONFIG.name;
 document.documentElement.style.setProperty("--accent", CONFIG.accent);
@@ -419,7 +416,7 @@ function appendMail(container) {
           container.appendChild(mail);
 }
 function setControlsDisabled(disabled) {
-          input.disabled = send.disabled = faqToggle.disabled = disabled;
+          input.disabled = send.disabled = disabled;
           chipsEl.querySelectorAll("button").forEach(b => b.disabled = disabled);
 }
 function refreshLeft() {
@@ -471,7 +468,7 @@ async function ask(text) {
             return;
           }
           if (busy || used() >= CONFIG.dailyLimit || globalRemaining === 0) return;
-          setFaqOpen(false);
+          if (window.innerWidth <= 600) faqBox.removeAttribute("open");
           input.placeholder = "Escribe tu pregunta";
           add(clean, "user"); history.push({ role: "user", content: clean });
           input.value = "";
