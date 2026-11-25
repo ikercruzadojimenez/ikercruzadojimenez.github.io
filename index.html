@@ -443,13 +443,17 @@ clearBtn = document.createElement("button");
 clearBtn.type = "button";
 clearBtn.textContent = "Nueva consulta";
 clearBtn.title = "Limpiar conversación actual";
-clearBtn.onclick = () => {
+clearBtn.addEventListener("click", () => {
           if (busy) return;
           history = [];
           log.replaceChildren();
           add(CONFIG.greeting, "bot");
-          if (!input.disabled) input.focus();
-};
+          if (!input.disabled) {
+            input.value = "";
+            input.placeholder = "Escribe tu pregunta";
+            input.focus();
+          }
+});
 $("links").appendChild(clearBtn);
 
 function escapeHtml(str) {
@@ -463,15 +467,10 @@ function escapeHtml(str) {
 
 function formatInline(escapedText) {
           let html = escapedText;
-          // Enlaces Markdown [texto](https://...)
           html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-          // URLs sueltas https://... (evitando capturar puntuación final o comillas de atributos ya creados)
           html = html.replace(/(^|[\s(>])(https?:\/\/[^\s<)]+?)([.,;:!?)]*(?=\s|$|<))/g, '$1<a href="$2" target="_blank" rel="noopener noreferrer">$2</a>$3');
-          // Correos electrónicos
           html = html.replace(/(^|[\s(>])([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})([.,;:!?)]*(?=\s|$|<))/g, '$1<a href="mailto:$2">$2</a>$3');
-          // Negritas **texto**
           html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-          // Código inline `texto`
           html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
           return html;
 }
@@ -496,15 +495,26 @@ function renderBotMarkdown(el, rawText) {
                 html += "</ul>";
                 inList = false;
               }
-              if (trimmed === "") {
-                continue;
-              }
+              if (trimmed === "") continue;
               html += `<p>${formatInline(escapeHtml(trimmed))}</p>`;
             }
           }
 
           if (inList) html += "</ul>";
           el.innerHTML = html || `<p>${escapeHtml(rawText)}</p>`;
+}
+
+function getClientId() {
+          try {
+            let id = localStorage.getItem("chatClientId");
+            if (!id) {
+              id = (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now());
+              localStorage.setItem("chatClientId", id);
+            }
+            return id;
+          } catch {
+            return "anon";
+          }
 }
 
 function used() {
@@ -562,7 +572,9 @@ function add(text, who) {
 }
 async function syncQuota() {
           try {
-            const r = await fetch(CONFIG.workerUrl);
+            const r = await fetch(CONFIG.workerUrl, {
+              headers: { "X-Client-ID": getClientId() }
+            });
             if (!r.ok) return;
             const data = await r.json();
             if (typeof data.globalLimit === "number") currentGlobalLimit = data.globalLimit;
@@ -587,7 +599,14 @@ async function ask(text) {
           setControlsDisabled(true);
           const wait = add("Escribiendo…", "bot");
           try {
-            const r = await fetch(CONFIG.workerUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history }) });
+            const r = await fetch(CONFIG.workerUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-Client-ID": getClientId()
+              },
+              body: JSON.stringify({ messages: history })
+            });
             const data = await r.json();
             if (typeof data.globalLimit === "number") currentGlobalLimit = data.globalLimit;
             if (typeof data.globalRemaining === "number") globalRemaining = data.globalRemaining;
