@@ -124,23 +124,26 @@
             font-size: .9rem;
         }
 
-        .links {
+       .links {
             margin-left: auto;
             display: flex;
-            flex-wrap: wrap;
-            gap: .5rem;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: .4rem;
+            flex-shrink: 0;
         }
 
             .links a,
             .links button {
                 font: inherit;
-                font-size: .85rem;
-                padding: .3rem .7rem;
+                font-size: .82rem;
+                padding: .3rem .65rem;
                 border-radius: 999px;
                 border: 1px solid var(--line);
                 background: transparent;
                 color: var(--ink);
                 text-decoration: none;
+                white-space: nowrap;
                 cursor: pointer;
             }
 
@@ -371,14 +374,23 @@
                     text-decoration: underline;
                 }
 
-        @media (max-width:520px) {
+      @media (max-width: 640px) {
             header {
                 flex-wrap: wrap;
+                gap: .65rem;
             }
 
             .links {
                 margin-left: 0;
                 width: 100%;
+                justify-content: flex-start;
+                gap: .35rem;
+            }
+
+            .links a,
+            .links button {
+                font-size: .78rem;
+                padding: .28rem .58rem;
             }
         }
     </style>
