@@ -9,7 +9,7 @@
 
 Interactive AI assistant for my professional portfolio as a **Multiplatform Application Developer (DAM)**, built on a **100% zero-cost serverless architecture** so recruiters and technical leads can ask questions about my CV, tech stack, and projects in real time.
 
-🔗 **Live Demo:** [https://ikercruzadojimenez.github.io](https://ikercruzadojimenez.github.io)
+**Live Demo:** [https://ikercruzadojimenez.github.io](https://ikercruzadojimenez.github.io)
 
 ---
 
@@ -20,6 +20,14 @@ Interactive AI assistant for my professional portfolio as a **Multiplatform Appl
 - **Persistent Rate Limiting (Cloudflare KV):** Tracks real daily usage per IP (`10 requests/day`) and globally (`120 requests/day`) with automatic 24-hour TTL expiration, syncing the remaining quota immediately on page load.
 - **Origin & Abuse Protection:** Enforces strict CORS (`ALLOWED_ORIGIN`), input length caps, conversation history trimming, and prompt-injection guardrails.
 - **Responsive UI & Direct Actions:** Lightweight vanilla HTML/CSS/JS frontend with automatic light/dark mode support, persistent FAQ chips, and one-click PDF CV download (`cv.pdf`).
+
+---
+
+## Screenshots
+
+| Desktop View — Chat & Markdown Formatting | Mobile View — Collapsible FAQ |
+| :---: | :---: |
+| ![Desktop View](screenshots/desktop_chat.png) | <img src="screenshots/mobile_chat.jpg" width="260" alt="Mobile View" /> |
 
 ---
 
