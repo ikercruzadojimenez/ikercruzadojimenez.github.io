@@ -498,7 +498,7 @@ clearBtn.addEventListener("click", () => {
           if (!input.disabled) {
             input.value = "";
             input.placeholder = "Escribe tu pregunta";
-            input.focus();
+            if (window.matchMedia("(pointer: fine)").matches) input.focus();
           }
 });
 $("links").appendChild(clearBtn);
@@ -664,7 +664,8 @@ async function ask(text) {
             wait.textContent = "No hay conexión con el asistente. Inténtalo de nuevo en un rato."; wait.classList.add("error");
           }
           busy = false;
-          refreshLeft(); if (!input.disabled) input.focus();
+          refreshLeft();
+          if (!input.disabled && window.matchMedia("(pointer: fine)").matches) input.focus();
           log.scrollTop = log.scrollHeight;
 }
 CONFIG.suggestions.forEach(s => { const b = document.createElement("button"); b.type = "button"; b.textContent = s; b.onclick = () => ask(s); chipsEl.appendChild(b); });
